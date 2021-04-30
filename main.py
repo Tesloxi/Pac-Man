@@ -25,62 +25,31 @@ display.set_caption("Pac Man")
 
 FPS = 60
 
-def main():
+def main(game):
 
-    # Setup game loop
-
-    clock = time.Clock()
-    start = True
     run = True
+    clock = time.Clock()
+    chrono_start = time.get_ticks()
+    time_elapsed = 0
 
     while run:
         clock.tick(FPS)
+        time_elapsed = int((time.get_ticks() - chrono_start) / 1000)
 
-        # Check collisions
-        if (phantom.position.x // SPRITE_SIZE == pacman.position.x //  SPRITE_SIZE and ((phantom.position.y + SPRITE_SIZE >= pacman.position.y and phantom.position.y + SPRITE_SIZE <= pacman.position.y + SPRITE_SIZE) or (phantom.position.y <= pacman.position.y + SPRITE_SIZE and phantom.position.y >= pacman.position.y))) \
-            or (phantom.position.y // SPRITE_SIZE == pacman.position.y //  SPRITE_SIZE and ((phantom.position.x + SPRITE_SIZE >= pacman.position.x and phantom.position.x + SPRITE_SIZE <= pacman.position.x + SPRITE_SIZE) or (phantom.position.x <= pacman.position.x + SPRITE_SIZE and phantom.position.x >= pacman.position.x))):
-            pacman.remaining_lives -= 1
-            print(pacman.remaining_lives)
-            pacman.reset_position()
-            phantom.reset_position()
-            time.delay(1000)
+        if game.lost():
+            run = False
             start = True
-        
-        # Draw the remaining pacgums (little yellow points you eat to earn points)
-        for j in map.pacgums:
-            if j[1]:
-                if j[0][0] == pacman.position.x // SPRITE_SIZE and j[0][1] == pacman.position.y // SPRITE_SIZE:
-                    j[1] = False
-                    pacman.score += 10
-                else:
-                    x = j[0][0] * SPRITE_SIZE + SPRITE_SIZE // 2
-                    y = j[0][1] * SPRITE_SIZE + SPRITE_SIZE // 2
-                    draw.circle(WIN, YELLOW, (x, y), 3)
 
-        if start: 
-            text = READY_FONT.render('READY !', 1, YELLOW)
-            WIN.blit(text, (int(WIDTH / 2 - text.get_width() // 2), int(HEIGHT / 2 - text.get_height() // 2)))
-            display.update()
-            time.delay(1000)
-            start = False
+        if game.activate_phantoms:
+            game.activate_phantom(time_elapsed)
 
-        for event in event.get():
-            if event.type == QUIT:
+        for e in event.get():
+            if e.type == QUIT:
                 run = False        
-            elif event.type == KEYDOWN:
-                if event.key == K_UP: pacman.new_direction = 'up'
-                elif event.key == K_RIGHT: pacman.new_direction = 'right'
-                elif event.key == K_DOWN: pacman.new_direction = 'down'
-                elif event.key == K_LEFT: pacman.new_direction = 'left'
-
-        pacman.change_dir()
-        phantom.change_dir()
-        pacman.move()
-        phantom.move()
-
-        if pacman.remaining_lives == 0 or pacman.score == MAX_SCORE: run = False
+            elif e.type == KEYDOWN:
+                game.change_dir(e.key)
         
-        game.update()
+        game.update(time_elapsed)
 
 def menu():
     run = True
@@ -94,7 +63,8 @@ def menu():
                 run = False
             elif e.type == KEYDOWN:
                 game.menu_active = False
-                main()
+                main(game)
+                run = False
     
     quit()
 

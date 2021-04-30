@@ -39,7 +39,8 @@ LEFT_IMAGE = load("./pacman/assets/character/left.png")
 PHANTOM_IMAGES = [
     load("./pacman/assets/phantom/blue.png"),
     load("./pacman/assets/phantom/green.png"),
-    load("./pacman/assets/phantom/orange.png")
+    load("./pacman/assets/phantom/orange.png"),
+    load("./pacman/assets/phantom/red.png")
 ]
 
 # Heart image
